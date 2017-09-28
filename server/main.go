@@ -1,7 +1,11 @@
 package main
 
 import (
+	"encoding/hex"
 	"flag"
+	"fmt"
+	"net"
+	"os"
 	"path"
 
 	"github.com/BurntSushi/toml"
@@ -88,10 +92,40 @@ func main() {
 	zone, err = NewZoneFromFile(zonePath)
 	if err != nil {
 		log.Errorf("Could not load '%s'. Reason: %v", zonePath, err)
+		os.Exit(1)
 	}
 
 	log.Info("Starting http server.")
-	handleHttp()
+	go handleHttp()
+
+	startUDPServer()
 
 	_ = zone
+}
+
+func startUDPServer() {
+	udpAddr, err := net.ResolveUDPAddr("udp", ":1234")
+	if err != nil {
+		log.Errorf("Could not resolve address. Reason: %v", err)
+		os.Exit(1)
+	}
+
+	conn, err := net.ListenUDP("udp", udpAddr)
+	if err != nil {
+		log.Errorf("Could not create connection. Reason: %v", err)
+		os.Exit(1)
+	}
+
+	var buf [2048]byte
+
+	for {
+		n, err := conn.Read(buf[:])
+		if err != nil {
+			log.Errorf("Read failed. Reason: %v", err)
+			os.Exit(1)
+		}
+
+		fmt.Println(hex.EncodeToString(buf[:n]))
+	}
+
 }

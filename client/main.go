@@ -39,6 +39,7 @@ func init() {
 }
 
 var defaultShader *renderer.ShaderProgram
+var serverConnection *ServerConnection
 
 func main() {
 	flag.Parse()

@@ -79,6 +79,13 @@ func (s *LoadingState) Run() bool {
 			}
 
 			log.Infof("Received zone: %v", zoneInfo)
+			var err error
+			serverConnection, err = NewServerConnection(clientSettings.Server, 1234)
+			if err != nil {
+				log.Errorf("Could not connect to gameserver. Reason %v.", err)
+				os.Exit(1)
+			}
+
 			s.infoLoading = false
 			s.infoLoaded = true
 		default:
