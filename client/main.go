@@ -5,19 +5,24 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strconv"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/trtstm/gosubspace/client/renderer"
 	"github.com/trtstm/gosubspace/helpers"
 	"github.com/trtstm/gosubspace/log"
+	"github.com/trtstm/gosubspace/protocol"
 	//	_ "net/http/pprof"
 )
 
 type ClientSettings struct {
 	ContinuumPath string
 	DataPath      string
+	ZonesPath     string
 	ResX          uint
 	ResY          uint
+	Server        string
+	ServerHTTP    string
 }
 
 var clientSettings = ClientSettings{
@@ -29,6 +34,7 @@ func init() {
 	runtime.LockOSThread()
 
 	flag.StringVar(&clientSettings.DataPath, "data", "data", "The path to the data folder.")
+	flag.StringVar(&clientSettings.Server, "server", "127.0.0.1", "The server address.")
 	flag.StringVar(&clientSettings.ContinuumPath, "continuum_path", "", "The path to the continuum folder(required).")
 }
 
@@ -40,6 +46,9 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
+
+	clientSettings.ZonesPath = path.Join(clientSettings.DataPath, "zones")
+	clientSettings.ServerHTTP = "http://" + clientSettings.Server + ":" + strconv.Itoa(protocol.ServerHTTPPort)
 
 	err := glfw.Init()
 	if err != nil {
